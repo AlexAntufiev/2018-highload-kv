@@ -19,7 +19,6 @@ package ru.mail.polis;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.NoSuchElementException;
 
 /**
@@ -28,12 +27,28 @@ import java.util.NoSuchElementException;
  * @author Vadim Tsesko <incubos@yandex.com>
  */
 public interface KVDao extends Closeable {
+    /**
+     * Get a entity by {@code key} from storage.
+     *
+     * @param key key
+     * @return found entity
+     * @throws NoSuchElementException if entity not found
+     */
     @NotNull
-    byte[] get(@NotNull byte[] key) throws NoSuchElementException, IOException;
+    byte[] get(@NotNull byte[] key) throws NoSuchElementException;
 
-    void upsert(
-            @NotNull byte[] key,
-            @NotNull byte[] value) throws IOException;
+    /**
+     * Insert {@code value} by {@code key} into storage.
+     *
+     * @param key   key
+     * @param value value
+     */
+    void upsert(@NotNull byte[] key, @NotNull byte[] value);
 
-    void remove(@NotNull byte[] key) throws IOException;
+    /**
+     * Delete a entity by {@code key} from storage.
+     *
+     * @param key key
+     */
+    void remove(@NotNull byte[] key);
 }
