@@ -9,7 +9,6 @@ import jetbrains.exodus.env.StoreConfig;
 import jetbrains.exodus.env.Transaction;
 import org.jetbrains.annotations.NotNull;
 import ru.mail.polis.KVDao;
-import ru.mail.polis.alexantufiev.exception.NotExecuteOperationException;
 
 import java.io.File;
 import java.util.NoSuchElementException;
@@ -47,30 +46,14 @@ public class KVDaoImpl implements KVDao {
         }
     }
 
-    /**
-     * @throws NotExecuteOperationException if operation not executed
-     */
     @Override
     public void upsert(@NotNull byte[] key, @NotNull byte[] value) {
-        environment.executeInTransaction(txn -> {
-            if (!getStore(txn).put(txn, bytesToEntry(key), bytesToEntry(value))) {
-                throw new NotExecuteOperationException("Can not put the entity to the storage");
-            }
-        });
+        environment.executeInTransaction(txn -> getStore(txn).put(txn, bytesToEntry(key), bytesToEntry(value)));
     }
 
-    /**
-     * @throws NotExecuteOperationException if operation not executed
-     */
     @Override
     public void remove(@NotNull byte[] key) {
         environment.executeInTransaction(txn -> getStore(txn).delete(txn, bytesToEntry(key)));
-
-        //        environment.executeInTransaction(txn -> {
-        //            if (!getStore(txn).delete(txn, bytesToEntry(key))) {
-        //                throw new NotExecuteOperationException("Can not put the entity to the storage");
-        //            }
-        //        });
     }
 
     @NotNull
