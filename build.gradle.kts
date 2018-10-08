@@ -21,6 +21,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 
+    // Xodus
+    compile("org.jetbrains.xodus:xodus-openAPI:1.2.2")
+    compile("org.jetbrains.xodus:xodus-environment:1.2.2")
+
+    // JUnit Jupiter test framework
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.3.1")
+
     // Guava for tests
     testCompile("com.google.guava:guava:23.1-jre")
 }
