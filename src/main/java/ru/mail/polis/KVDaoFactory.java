@@ -17,10 +17,9 @@
 package ru.mail.polis;
 
 import org.jetbrains.annotations.NotNull;
-import ru.mail.polis.alexantufiev.KVDaoImpl;
+import ru.mail.polis.alexantufiev.dao.KVDaoImpl;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Custom {@link KVDao} factory

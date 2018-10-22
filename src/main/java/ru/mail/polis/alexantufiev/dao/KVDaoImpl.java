@@ -1,4 +1,4 @@
-package ru.mail.polis.alexantufiev;
+package ru.mail.polis.alexantufiev.dao;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
  * The implementation of {@link KVDao}.
  *
  * @author Aleksey Antufev
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0 01.05.2018
  */
 public class KVDaoImpl implements KVDao {
@@ -36,7 +36,7 @@ public class KVDaoImpl implements KVDao {
     @NotNull
     @Override
     public byte[] get(@NotNull byte[] key) throws NoSuchElementException {
-        final ByteIterable[] byteIterable = new ByteIterable[1];
+        ByteIterable[] byteIterable = new ByteIterable[1];
         environment.executeInTransaction(txn -> byteIterable[0] = getStore(txn).get(txn, bytesToEntry(key)));
 
         if (byteIterable[0] == null) {

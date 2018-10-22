@@ -44,9 +44,10 @@ final class KVServiceFactory {
      */
     @NotNull
     static KVService create(
-            final int port,
-            @NotNull final KVDao dao,
-            @NotNull final Set<String> topology) throws IOException {
+        final int port,
+        @NotNull final KVDao dao,
+        @NotNull final Set<String> topology
+    ) throws IOException {
         if (Runtime.getRuntime().maxMemory() > MAX_HEAP) {
             throw new IllegalStateException("The heap is too big. Consider setting Xmx.");
         }
@@ -55,6 +56,6 @@ final class KVServiceFactory {
             throw new IllegalArgumentException("Port out of range");
         }
 
-        return new KVServiceImpl(port,topology,dao);
+        return new KVServiceImpl(port,topology, dao);
     }
 }
