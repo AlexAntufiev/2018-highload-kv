@@ -10,6 +10,7 @@ import ru.mail.polis.alexantufiev.entity.Replica;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ public class KVServiceImpl extends DefaultKVService {
 
     public KVServiceImpl(int port, @NotNull Set<String> topology, @NotNull KVDao dao) throws IOException {
         this(port);
+        nodes = new HashSet<>(topology.size());
         for (String node : topology) {
             nodes.add(new KVServiceImpl(new URL(node), dao));
         }
@@ -75,7 +77,7 @@ public class KVServiceImpl extends DefaultKVService {
                 putEntity(request, session, id, replica);
                 break;
             case Request.METHOD_DELETE:
-                deleteEntity(session, id,replica);
+                deleteEntity(session, id, replica);
                 break;
             default:
                 sendResponse(session, Response.METHOD_NOT_ALLOWED);
