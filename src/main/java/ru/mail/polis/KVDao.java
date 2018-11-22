@@ -17,6 +17,7 @@
 package ru.mail.polis;
 
 import org.jetbrains.annotations.NotNull;
+import ru.mail.polis.alexantufiev.entity.BytesEntity;
 
 import java.io.Closeable;
 import java.util.NoSuchElementException;
@@ -51,4 +52,10 @@ public interface KVDao extends Closeable {
      * @param key key
      */
     void remove(@NotNull byte[] key);
+
+    BytesEntity getEntity(@NotNull byte[] key);
+
+    boolean isAccessible();
+
+    void isAccessible(boolean isAccessible);
 }

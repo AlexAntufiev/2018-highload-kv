@@ -29,7 +29,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 /**
  * Unit tests for a two node {@link KVService} cluster
@@ -174,7 +176,7 @@ class TwoNodeTest extends ClusterTestBase {
             start(1, storage1);
 
             // Check
-            final Response response = get(1, key, 2, 2);
+            final Response response = get(1, key, 1, 2);
             assertEquals(200, response.getStatus());
             assertArrayEquals(value, response.getBody());
         });
