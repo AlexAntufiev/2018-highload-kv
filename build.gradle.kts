@@ -1,3 +1,5 @@
+import org.gradle.jvm.tasks.Jar
+
 // See https://gradle.org and https://github.com/gradle/kotlin-dsl
 
 // Apply the java plugin to add support for Java
@@ -9,6 +11,8 @@ plugins {
 repositories {
     jcenter()
 }
+
+version = "1.0.0"
 
 dependencies {
     // Our beloved one-nio
@@ -45,4 +49,22 @@ application {
 
     // And limit Xmx
     applicationDefaultJvmArgs = listOf("-Xmx128m")
+}
+
+
+val fatJar = task("fatJar", type = Jar::class) {
+    baseName = "${project.name}-fat"
+    manifest {
+        attributes["Implementation-Title"] = "Gradle Jar File Example"
+        attributes["Implementation-Version"] = version
+        attributes["Main-Class"] = "ru.mail.polis.Cluster"
+    }
+    from(configurations.runtime.map({ if (it.isDirectory) it else zipTree(it) }))
+    with(tasks["jar"] as CopySpec)
+}
+
+tasks {
+    "build" {
+        dependsOn(fatJar)
+    }
 }

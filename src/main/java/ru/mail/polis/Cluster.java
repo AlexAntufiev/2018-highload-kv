@@ -27,7 +27,7 @@ import java.util.Set;
  * @author Vadim Tsesko <mail@incubos.org>
  */
 public final class Cluster {
-    private static final int[] PORTS = {8080, 8081, 8082};
+    private static final int[] PORTS = {8090, 8091, 8092};
 
     private Cluster() {
         // Not instantiable

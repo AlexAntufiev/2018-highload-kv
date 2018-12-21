@@ -22,6 +22,7 @@ import ru.mail.polis.alexantufiev.entity.State;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,12 +90,14 @@ public class KVServiceImpl extends HttpServer implements KVService {
     @Path(PATH)
     public void handleDefault(Request request, HttpSession session) {
         if (!PATH.equals(request.getPath())) {
+            System.out.println("BAD PATH");
             sendError(session, Response.BAD_REQUEST);
             return;
         }
 
         String id = request.getParameter("id=");
         if (id == null || id.isEmpty()) {
+            System.out.println("ID NULL");
             sendError(session, Response.BAD_REQUEST);
             return;
         }
@@ -107,6 +110,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                 request.getHeader(NO_REPLICA) != null
             );
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            System.out.println("BAD REPLICA");
             sendError(session, Response.BAD_REQUEST);
             return;
         }
@@ -221,6 +225,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                                 countOfRespondedNodes++;
                                 break;
                             default:
+                                System.out.println(Arrays.toString(response.getBody()));
                                 break;
                         }
                     }
