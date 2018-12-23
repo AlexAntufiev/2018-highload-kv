@@ -12,7 +12,7 @@ repositories {
     jcenter()
 }
 
-version = "1.0.0"
+version = "1.0.1"
 
 dependencies {
     // Our beloved one-nio
@@ -34,6 +34,9 @@ dependencies {
 
     // Guava for tests
     testCompile("com.google.guava:guava:23.1-jre")
+
+    compile("org.slf4j:slf4j-api:1.7.+")
+    compile("ch.qos.logback:logback-classic:1.1.3")
 }
 
 tasks {

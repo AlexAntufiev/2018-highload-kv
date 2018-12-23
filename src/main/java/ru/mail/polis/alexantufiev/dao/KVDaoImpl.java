@@ -4,6 +4,7 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.CompoundByteIterable;
 import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
 import jetbrains.exodus.env.Environments;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
@@ -28,7 +29,6 @@ import static jetbrains.exodus.bindings.StringBinding.stringToEntry;
 public class KVDaoImpl implements KVDao {
 
     private final Environment environment;
-    //    private final PersistentEntityStore store;
     private static final String STORAGE_NAME = "MyStorage";
     private static final String propertyTime = "time";
     private static final String propertyIsDeleted = "isDeleted";
@@ -37,7 +37,22 @@ public class KVDaoImpl implements KVDao {
     private boolean isAccessible;
 
     public KVDaoImpl(@NotNull File data) {
-        environment = Environments.newInstance(data);
+        EnvironmentConfig ec = new EnvironmentConfig();
+        ec.setMemoryUsagePercentage(95);
+        ec.setEnvMonitorTxnsTimeout(0);
+        ec.setEnvMonitorTxnsCheckFreq(10000);
+        ec.setLogFileSize(8192L * 8);
+        ec.setLogCachePageSize(64 * 1024 * 2);
+        ec.setLogCacheUseNio(true);
+        ec.setLogCacheFreePhysicalMemoryThreshold(2_000_000_000L);
+        ec.setEnvStoreGetCacheSize(40000);
+        ec.setTreeMaxPageSize(1024);
+//        ec.setGcStartIn(0);
+//        ec.setGcFileMinAge(1);
+        ec.setGcRunPeriod(1000);
+        ec.setLogCacheOpenFilesCount(1000);
+//        ec.setLogSyncPeriod(10000);
+        environment = Environments.newInstance(data, ec);
         isAccessible = true;
     }
 
@@ -113,12 +128,11 @@ public class KVDaoImpl implements KVDao {
 
     @NotNull
     private Store getStore(Transaction txn) {
-        return environment.openStore(STORAGE_NAME, StoreConfig.WITHOUT_DUPLICATES, txn);
+        return environment.openStore(STORAGE_NAME, StoreConfig.WITHOUT_DUPLICATES_WITH_PREFIXING, txn);
     }
 
     @Override
     public void close() {
         environment.close();
-        //        store.close();
     }
 }

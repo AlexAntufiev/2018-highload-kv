@@ -16,6 +16,9 @@
 
 package ru.mail.polis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -28,6 +31,8 @@ import java.util.Set;
  */
 public final class Cluster {
     private static final int[] PORTS = {8090, 8091, 8092};
+
+    private static final Logger logger = LoggerFactory.getLogger(Cluster.class);
 
     private Cluster() {
         // Not instantiable
@@ -46,24 +51,25 @@ public final class Cluster {
             final File data = Files.createTempDirectory();
             final KVDao dao = KVDaoFactory.create(data);
 
-            System.out.println("Starting node " + i + " on port " + port + " and data at " + data);
+            logger.info("Starting node {} on port {} and data at {}", i, port, data);
 
             // Start the storage
             final KVService storage =
-                    KVServiceFactory.create(
-                            port,
-                            dao,
-                            topology);
+                KVServiceFactory.create(
+                    port,
+                    dao,
+                    topology
+                );
             storage.start();
             Runtime.getRuntime().addShutdownHook(
-                    new Thread(() -> {
-                        storage.stop();
-                        try {
-                            dao.close();
-                        } catch (IOException e) {
-                            throw new RuntimeException("Can't close dao", e);
-                        }
-                    }));
+                new Thread(() -> {
+                    storage.stop();
+                    try {
+                        dao.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Can't close dao", e);
+                    }
+                }));
         }
     }
 }

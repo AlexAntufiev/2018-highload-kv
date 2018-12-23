@@ -108,7 +108,7 @@ class KVDaoTest extends TestBase {
     }
 
     @Test
-    void insert() throws IOException {
+    void insert() {
         final byte[] key = randomKey();
         final byte[] value = randomValue();
         dao.upsert(key, value);
@@ -117,7 +117,7 @@ class KVDaoTest extends TestBase {
     }
 
     @Test
-    void emptyValue() throws IOException {
+    void emptyValue() {
         final byte[] key = randomKey();
         final byte[] value = new byte[0];
         dao.upsert(key, value);
@@ -126,7 +126,7 @@ class KVDaoTest extends TestBase {
     }
 
     @Test
-    void upsert() throws IOException {
+    void upsert() {
         final byte[] key = randomKey();
         final byte[] value1 = randomValue();
         final byte[] value2 = randomValue();
