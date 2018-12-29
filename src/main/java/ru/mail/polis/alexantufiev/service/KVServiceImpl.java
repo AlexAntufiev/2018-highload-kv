@@ -92,24 +92,24 @@ public class KVServiceImpl extends HttpServer implements KVService {
 
     @Path(PATH)
     public void handleDefault(Request request, HttpSession session) {
-        logger.debug(String.format(
-            "*** HANDLE REQUEST *** METHOD='%s'\n PATH='%s'\n QUERY='%s'\n HEADERS='%s'\n BODY='%s'\n ",
+        logger.debug(
+            "*** HANDLE REQUEST *** METHOD='{}'\n PATH='{}'\n QUERY='{}'\n HEADERS='{}'\n BODY='{}'\n ",
             request.getMethod(),
             request.getPath(),
             request.getQueryString(),
             Arrays.toString(request.getHeaders()),
             Arrays.toString(request.getBody())
-        ));
+        );
         String path = request.getPath();
         if (!PATH.equals(path)) {
-            logger.error(String.format("BAD PATH: %s", path));
+            logger.error("BAD PATH: {}", path);
             sendError(session, Response.BAD_REQUEST);
             return;
         }
 
         String id = request.getParameter("id=");
         if (id == null || id.isEmpty()) {
-            logger.error(String.format("BAD ID: %s", id));
+            logger.error("BAD ID: {}", id);
             sendError(session, Response.BAD_REQUEST);
             return;
         }
@@ -123,7 +123,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                 request.getHeader(NO_REPLICA) != null
             );
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            logger.error(String.format("BAD REPLICA: %s", replicas));
+            logger.error("BAD REPLICA: {}", replicas);
             sendError(session, Response.BAD_REQUEST);
             return;
         }
@@ -145,7 +145,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
 
     private void getEntity(HttpSession session, String id, Optional<Replica> replica) {
         if (!replica.isPresent()) {
-            logger.debug(String.format("*** RECEIVE REQUEST : GET IN LOCAL DAO *** ID='%s'", id));
+            logger.debug("*** RECEIVE REQUEST : GET IN LOCAL DAO *** ID='{}'", id);
             executeAndSendResponse(() -> dao.get(id.getBytes()), session, Response.OK);
             return;
         }
@@ -159,7 +159,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                     if (value == null) {
                         BytesEntity entity = dao.getEntity(id.getBytes());
                         boolean deleted = entity.isDeleted();
-                        logger.debug(String.format("*** SEND REQUEST : GET IN DAO *** STATUS_DELETED='%s' ID='%s'", deleted, id));
+                        logger.debug("*** SEND REQUEST : GET IN DAO *** STATUS_DELETED='{}' ID='{}'", deleted, id);
                         if (deleted) {
                             states.add(State.DELETED);
                         } else {
@@ -167,7 +167,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                             bytes = entity.getBytes();
                         }
                     } else {
-                        logger.debug(String.format("*** SEND REQUEST : GET IN DAO *** ID='%s'", id));
+                        logger.debug("*** SEND REQUEST : GET IN DAO *** ID='{}'", id);
                         Response response = value.get(String.format(PATH_WITH_ID_PATTERN, id), NO_REPLICA);
                         int status = response.getStatus();
                         switch (status) {
@@ -182,7 +182,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                                 states.add(State.DELETED);
                                 break;
                             default:
-                                logger.error(String.format("WRONG STATUS: %d", status));
+                                logger.error("WRONG STATUS: {}", status);
                                 break;
                         }
                     }
@@ -196,12 +196,12 @@ public class KVServiceImpl extends HttpServer implements KVService {
         }
         int countOfRespondedNodes = 0;
         if (states.size() < replica.get().getCountRequests()) {
-            logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.GATEWAY_TIMEOUT));
+            logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.GATEWAY_TIMEOUT);
             sendError(session, Response.GATEWAY_TIMEOUT);
         }
         for (State state : states) {
             if (state == State.DELETED) {
-                logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.NOT_FOUND));
+                logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.NOT_FOUND);
                 sendError(session, Response.NOT_FOUND);
                 return;
             }
@@ -211,20 +211,20 @@ public class KVServiceImpl extends HttpServer implements KVService {
         }
         if (states.contains(State.NO_EXIST)) {
             if (countOfRespondedNodes == replica.get().getCountRequests()) {
-                logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.OK));
+                logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.OK);
                 sendResponse(session, Response.OK, bytes);
             } else {
-                logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.NOT_FOUND));
+                logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.NOT_FOUND);
                 sendError(session, Response.NOT_FOUND);
             }
         }
-        logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.OK));
+        logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.OK);
         sendResponse(session, Response.OK, bytes);
     }
 
     private void putEntity(Request request, HttpSession session, String id, Optional<Replica> replica) {
         if (!replica.isPresent()) {
-                logger.debug(String.format("*** RECEIVE REQUEST : INSERT INTO LOCAL DAO *** ID='%s'", id));
+                logger.debug("*** RECEIVE REQUEST : INSERT INTO LOCAL DAO *** ID='{}'", id);
                 executeAndSendResponse(() -> dao.upsert(id.getBytes(), request.getBody()), session, Response.CREATED);
                 return;
         }
@@ -235,11 +235,11 @@ public class KVServiceImpl extends HttpServer implements KVService {
                 try {
                     HttpClient value = entry.getValue();
                     if (value == null) {
-                            logger.debug(String.format("*** INSERT INTO LOCAL DAO *** ID='%s'", id));
+                            logger.debug("*** INSERT INTO LOCAL DAO *** ID='{}'", id);
                             dao.upsert(id.getBytes(), request.getBody());
                             countOfRespondedNodes++;
                     } else {
-                            logger.debug(String.format("*** SEND REQUEST : INSERT DAO *** ID='%s'", id));
+                            logger.debug("*** SEND REQUEST : INSERT DAO *** ID='{}'", id);
                             Response response = value.put(
                                 String.format(PATH_WITH_ID_PATTERN, id),
                                 request.getBody(),
@@ -249,7 +249,7 @@ public class KVServiceImpl extends HttpServer implements KVService {
                             if (status == 201) {
                                 countOfRespondedNodes++;
                             } else {
-                                logger.error(String.format("WRONG STATUS: %d", status));
+                                logger.error("WRONG STATUS: {}", status);
                             }
                         }
                 } catch (IOException | InterruptedException | HttpException | PoolException | NoAccessException e) {
@@ -259,17 +259,17 @@ public class KVServiceImpl extends HttpServer implements KVService {
             countOfExpectedNodes--;
         }
         if (countOfRespondedNodes >= replica.get().getCountRequests()) {
-            logger.debug(String.format("*** SEND FINAL RESPONSE *** STATUS='%s'", Response.CREATED));
+            logger.debug("*** SEND FINAL RESPONSE *** STATUS='{}'", Response.CREATED);
             sendResponse(session, Response.CREATED);
         } else {
-            logger.debug(String.format("*** SEND FINAl RESPONSE *** STATUS='%s'", Response.GATEWAY_TIMEOUT));
+            logger.debug("*** SEND FINAl RESPONSE *** STATUS='{}'", Response.GATEWAY_TIMEOUT);
             sendError(session, Response.GATEWAY_TIMEOUT);
         }
     }
 
     private void deleteEntity(HttpSession session, String id, Optional<Replica> replica) {
         if (!replica.isPresent()) {
-            logger.debug(String.format("*** RECEIVE REQUEST : DELETE IN LOCAL DAO *** ID='%s'", id));
+            logger.debug("*** RECEIVE REQUEST : DELETE IN LOCAL DAO *** ID='{}'", id);
             executeAndSendResponse(() -> dao.remove(id.getBytes()), session, Response.ACCEPTED);
             return;
         }
@@ -280,17 +280,17 @@ public class KVServiceImpl extends HttpServer implements KVService {
                 try {
                     HttpClient value = entry.getValue();
                     if (value == null) {
-                        logger.debug(String.format("*** DELETE IN LOCAL DAO *** ID='%s'", id));
+                        logger.debug("*** DELETE IN LOCAL DAO *** ID='{}'", id);
                         dao.remove(id.getBytes());
                         countOfRespondedNodes++;
                     } else {
-                        logger.debug(String.format("*** SEND REQUEST : DELETE IN DAO *** ID='%s'", id));
+                        logger.debug("*** SEND REQUEST : DELETE IN DAO *** ID='{}'", id);
                         Response response = value.delete(String.format(PATH_WITH_ID_PATTERN, id), NO_REPLICA);
                         int status = response.getStatus();
                         if (status == 202) {
                             countOfRespondedNodes++;
                         } else {
-                            logger.error(String.format("WRONG STATUS: %d", status));
+                            logger.error("WRONG STATUS: {}", status);
                         }
                     }
                 } catch (HttpException | IOException | InterruptedException | NoAccessException | PoolException e) {
@@ -303,10 +303,10 @@ public class KVServiceImpl extends HttpServer implements KVService {
         }
 
         if (countOfRespondedNodes >= replica.get().getCountRequests()) {
-            logger.debug(String.format("*** SEND FINAl RESPONSE *** STATUS='%s'", Response.ACCEPTED));
+            logger.debug("*** SEND FINAl RESPONSE *** STATUS='{}'", Response.ACCEPTED);
             sendResponse(session, Response.ACCEPTED);
         } else {
-            logger.debug(String.format("*** SEND FINAl RESPONSE *** STATUS='%s'", Response.GATEWAY_TIMEOUT));
+            logger.debug("*** SEND FINAl RESPONSE *** STATUS='{}'", Response.GATEWAY_TIMEOUT);
             sendError(session, Response.GATEWAY_TIMEOUT);
         }
     }
@@ -318,9 +318,9 @@ public class KVServiceImpl extends HttpServer implements KVService {
         } catch (NoSuchElementException exception) {
             sendError(session, Response.NOT_FOUND);
         } catch (RuntimeException exception) {
-            logger.debug(String.format("*** FAILED EXECUTE AND SEND RESPONSE *** STATUS='%s' MESSAGE='%s'", status,
+            logger.debug("*** FAILED EXECUTE AND SEND RESPONSE *** STATUS='{}' MESSAGE='{}' with exception={}", status,
                 "EMPTY"
-            ), exception);
+            , exception);
         }
     }
 
@@ -330,20 +330,20 @@ public class KVServiceImpl extends HttpServer implements KVService {
         } catch (NoSuchElementException exception) {
             sendError(session, Response.NOT_FOUND);
         } catch (RuntimeException exception) {
-            logger.debug(String.format("*** FAILED EXECUTE AND SEND RESPONSE *** STATUS='%s' MESSAGE='%s'", status,
+            logger.debug("*** FAILED EXECUTE AND SEND RESPONSE *** STATUS='{}' MESSAGE='{}' with exception={}", status,
                 "EMPTY"
-            ), exception);
+            , exception);
         }
     }
 
     protected static void sendResponse(@NotNull HttpSession session, Response response) {
         try {
-            logger.debug(String.format("*** SEND RESPONSE *** STATUS='%s' BYTES='%s'", response.getStatus(), Arrays.toString(response.getBody())));
+            logger.debug("*** SEND RESPONSE *** STATUS='{}' BYTES='{}'", response.getStatus(), Arrays.toString(response.getBody()));
             session.sendResponse(response);
         } catch (IOException e) {
-            logger.debug(String.format("*** FAILED SEND RESPONSE *** STATUS='%s' MESSAGE='%s'", response.getStatus(),
+            logger.debug("*** FAILED SEND RESPONSE *** STATUS='{}' MESSAGE='{}' with exception={}", response.getStatus(),
                 Arrays.toString(response.getBody())
-            ), e);
+            , e);
         }
     }
 
@@ -357,10 +357,10 @@ public class KVServiceImpl extends HttpServer implements KVService {
 
     protected static void sendError(@NotNull HttpSession session, String status, String message) {
         try {
-            logger.debug(String.format("*** SEND ERROR *** STATUS='%s' MESSAGE='%s'", status, message));
+            logger.debug("*** SEND ERROR *** STATUS='{}' MESSAGE='{}'", status, message);
             session.sendError(status, message);
         } catch (IOException e) {
-            logger.debug(String.format("*** FAILED SEND ERROR *** STATUS='%s' MESSAGE='%s'", status, message), e);
+            logger.debug("*** FAILED SEND ERROR *** STATUS='{}' MESSAGE='{}' with exception={}", status, message, e);
         }
     }
 

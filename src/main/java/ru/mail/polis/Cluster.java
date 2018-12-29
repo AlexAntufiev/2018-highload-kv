@@ -55,21 +55,20 @@ public final class Cluster {
 
             // Start the storage
             final KVService storage =
-                KVServiceFactory.create(
-                    port,
-                    dao,
-                    topology
-                );
+                    KVServiceFactory.create(
+                            port,
+                            dao,
+                            topology);
             storage.start();
             Runtime.getRuntime().addShutdownHook(
-                new Thread(() -> {
-                    storage.stop();
-                    try {
-                        dao.close();
-                    } catch (IOException e) {
-                        throw new RuntimeException("Can't close dao", e);
-                    }
-                }));
+                    new Thread(() -> {
+                        storage.stop();
+                        try {
+                            dao.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Can't close dao", e);
+                        }
+                    }));
         }
     }
 }
